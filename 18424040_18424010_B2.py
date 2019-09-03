@@ -153,7 +153,7 @@ while rowindex < n:
 
 i = 0
 print ("Write csv")
-with open('CSV.csv', 'w', newline='') as csvfile:
+with open('18424040_18424010_B2.csv', 'w', newline='') as csvfile:
     fieldnames = [countryN, nameN, longNameN, foundingDateN, populationN, capitalN, largestCityN, areaN]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
