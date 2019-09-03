@@ -1,4 +1,4 @@
-
+import sys, getopt
 import csv
 
 #class-----------------------------------------
@@ -51,6 +51,8 @@ class Countries:
     print ("capital:", self.capital)
     print ("largestCity:", self.largestCity)
     print ("area:", self.area)
+
+
 	
 #main-----------------------------------------
 txtFile = "countries.txt"
@@ -76,6 +78,7 @@ largestCityN = "largestCity"
 areaN = "area"	
 
 #create list countries not null
+print ("Reading file : ", txtFile)
 while rowindex < n:
 	if (rowindex+7) >= n:
 		break
@@ -149,10 +152,43 @@ while rowindex < n:
 	l.insert(indexL, coun)
 	indexL += 1
 	rowindex += rowPlus
+print ("Readed file : ", txtFile)
 
 
+#Xoa phan tu trung nhau
+print ("Deleting: ", len(l))
+i=0
+j=0
+while i < indexL-1:
+	c1 = l[i]
+	j = i + 1
+	i+=1
+	while j < indexL:
+		c2 = l[j]
+		j+=1
+		if (c1.name == c2.name and c1.longName == c2.longName and c1.capital == c2.capital and c1.largestCity == c2.largestCity and c1.area == c2.area):
+			l.remove(c2)
+			j-=1
+			indexL-=1
+		
+print ("Deleted: ", len(l))
+
+#Chuyen ve km2
+print ("Dang chuyen km2")
+i=0
+mitokm = 1.61*1.61
+while i < indexL:
+	c = l[i]
+	i+=1
+	if (str(c.area).find('mi') > 0) :
+		arr = str(c.area).split("mi")
+		c.area = str(round(float(arr[0].replace("or ", "").replace(",", ".")) * mitokm, 2)) + "km"
+		
+print ("Da chuyen km2")
+
+#Xuat csv List
 i = 0
-print ("Write csv")
+print ("Writing csv")
 with open('18424040_18424010_B2.csv', 'w', newline='') as csvfile:
     fieldnames = [countryN, nameN, longNameN, foundingDateN, populationN, capitalN, largestCityN, areaN]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -170,5 +206,5 @@ with open('18424040_18424010_B2.csv', 'w', newline='') as csvfile:
     				largestCityN: c1.largestCity,
     				areaN: c1.area})
 
- 
+
 print ("Write csv finish")  
