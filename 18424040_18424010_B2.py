@@ -1,9 +1,31 @@
 import sys, getopt
 import csv
+#from sys import argv
+
+#command line
+#script, first, second = argv
+#python 18424040_18424010_B2.py E:\countries.txt E:\18424040_18424010_B2.csv
+
+txtFile = str(sys.argv[1])#"countries.txt"
+csvfile = str(sys.argv[2])#"18424040_18424010_B2.csv"
+
+rowindex = 8
+rowPlus = 7
+
+l = []
+indexL = 0
+
+countryN = "country"
+nameN = "name"
+longNameN = "longName"
+foundingDateN = "foundingDate"
+populationN = "population"
+capitalN = "capital"
+largestCityN = "largestCity"
+areaN = "area"	
 
 #class-----------------------------------------
 class Countries:
-
   def __init__(self):
     self.country = ""
     self.name = ""
@@ -13,7 +35,6 @@ class Countries:
     self.capital = ""
     self.largestCity = ""
     self.area = 0
-   
   def setCountries(self,  country, name, longName, foundingDate, population, capital, largestCity, areaSqMimi):
     self.country = country
     self.name = name
@@ -23,7 +44,6 @@ class Countries:
     self.capital = capital
     self.largestCity = largestCity
     self.area = areaSqMimi
-
   def setValue(self, value, col):
     if col == "country" :
     	self.country = value
@@ -41,7 +61,6 @@ class Countries:
     	self.largestCity = value
     if col == "area" :
     	self.area = value
-
   def printValues(self):
     print ("country:", self.country)
     print ("name:", self.name)
@@ -53,32 +72,14 @@ class Countries:
     print ("area:", self.area)
 
 
-	
 #main-----------------------------------------
-txtFile = "countries.txt"
-
 with open(txtFile, "r") as file:
     lines = [line.strip() for line in file]
-
 #
 n = len(lines)
-rowindex = 8
-rowPlus = 7
-
-l = []
-indexL = 0
-
-countryN = "country"
-nameN = "name"
-longNameN = "longName"
-foundingDateN = "foundingDate"
-populationN = "population"
-capitalN = "capital"
-largestCityN = "largestCity"
-areaN = "area"	
 
 #create list countries not null
-print ("Reading file : ", txtFile)
+print ("-Reading file : ", txtFile)
 while rowindex < n:
 	if (rowindex+7) >= n:
 		break
@@ -152,11 +153,10 @@ while rowindex < n:
 	l.insert(indexL, coun)
 	indexL += 1
 	rowindex += rowPlus
-print ("Readed file : ", txtFile)
-
-
+print ("Finish") 
+b2_1 = "Xoa mau rong: Finish"
 #Xoa phan tu trung nhau
-print ("Deleting: ", len(l))
+print ("-Deleting: ", len(l))
 i=0
 j=0
 while i < indexL-1:
@@ -170,11 +170,10 @@ while i < indexL-1:
 			l.remove(c2)
 			j-=1
 			indexL-=1
-		
-print ("Deleted: ", len(l))
-
+print ("Finish: ", len(l))
+b2_2 = "Xoa trung nhau: Finish"
 #Chuyen ve km2
-print ("Dang chuyen km2")
+print ("-Change km2")
 i=0
 mitokm = 1.61*1.61
 while i < indexL:
@@ -183,13 +182,27 @@ while i < indexL:
 	if (str(c.area).find('mi') > 0) :
 		arr = str(c.area).split("mi")
 		c.area = str(round(float(arr[0].replace("or ", "").replace(",", ".")) * mitokm, 2)) + "km"
-		
-print ("Da chuyen km2")
+print ("Finish") 
+b2_3 = "Chuyen km2: Finish"
 
-#Xuat csv List
+print ("-Writing csv")
 i = 0
-print ("Writing csv")
-with open('18424040_18424010_B2.csv', 'w', newline='') as csvfile:
+with open(csvfile, 'w+', newline='') as csvfile:
+    fieldnames = ["Ket qua"]
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+    writer.writeheader()
+    writer.writerow({"Ket qua": b2_1})
+    writer.writerow({"Ket qua": b2_2})
+    writer.writerow({"Ket qua": b2_3})
+    	
+print ("Finish") 
+
+"""
+#Xuat csv List
+print ("-Writing csv")
+i = 0
+with open(csvfile, 'w+', newline='') as csvfile:
     fieldnames = [countryN, nameN, longNameN, foundingDateN, populationN, capitalN, largestCityN, areaN]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -205,6 +218,5 @@ with open('18424040_18424010_B2.csv', 'w', newline='') as csvfile:
     				capitalN: c1.capital,
     				largestCityN: c1.largestCity,
     				areaN: c1.area})
-
-
-print ("Write csv finish")  
+print ("Finish")  
+"""
