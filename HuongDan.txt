@@ -1,0 +1,4 @@
+Copy file 18424040_18424010_B2.py cung thuc muc vs file countries.txt, vi du la E:\
+sau do chay cmd lan luot cac lenh
+E:
+python 18424040_18424010_B2.py E:\countries.txt E:\18424040_18424010_B2.csv
