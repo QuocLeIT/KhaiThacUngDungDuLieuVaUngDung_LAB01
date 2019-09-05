@@ -1,11 +1,11 @@
 import math
 import csv
-from sys import argv
+import argparse
 
 #đọc tập tin và trả list
 def docCSV(filename):
 	with open(filename, 'r') as file:
-		csvReader = csv.reader(csvfile)
+		csvReader = csv.reader(file)
 
 		rowsCSV = list()
 		#{thuocTinh : {dong : value} }
@@ -25,41 +25,44 @@ def docCSV(filename):
 		for position, thuocTinh in enumerate(listThuocTinh):
 			mapColThuocTinh[position] = thuocTinh
 
-		generalMap['thuocTinhList'] = listThuocTinh
+		generalMap['headerThuocTinhList'] = listThuocTinh
 
 		#put giá trị vào map
 		for lineNum, row in enumerate(rowsCSV):
 			maxLineNum = lineNum
 			for positionCol, colValue in enumerate(row):
-				if positionCol in mapThuocTinh:
-					if mapThuocTinh.get(positionCol) not in dictCSV:
-						dictCSV[mapThuocTinh.get(positionCol)] = dict()
+				if positionCol in mapColThuocTinh:
+					if mapColThuocTinh.get(positionCol) not in dictCSV:
+						dictCSV[mapColThuocTinh.get(positionCol)] = dict()
 
-					dictCSV.get(mapThuocTinh.get(positionCol))[lineNum] = colValue
+					dictCSV.get(mapColThuocTinh.get(positionCol))[lineNum] = convertStringToNumber(colValue)
 
 		generalMap['sampleCSV'] = dictCSV
 		generalMap['maxLineNum'] = maxLineNum
 	return generalMap
 
 #ghi tập tin
-def ghiCSV(filename, dictCSV, listTT, maxLineNum):
+def ghiCSV(filename, dictCSV, listHeaderTT, maxLineNum):
 	listMapCSV = list() 
 	lineNum = 0
-	with open(filename, 'w') as file:
-		writer = csv.writer(file)
 
-		#chuyển sang map csv
-		while lineNum <= maxLineNum:
-			#{thuocTinh : gTri}
-			mapCSV = dict()
-			for thuocTinh in listTT:
-				if lineNum in dictCSV.get(thuocTinh):
-					mapCSV[thuocTinh] = dictCSV.get(thuocTinh).get(lineNum)
-			listMapCSV.append(mapCSV)
-			lineNum = lineNum + 1
+	#chuyển sang map csv
+	#{header1 : val1, header2 : val2}
+	while lineNum <= maxLineNum:
+		#{thuocTinh : gTri}
+		mapCSV = dict()
+		for thuocTinh in listHeaderTT:
+			if lineNum in dictCSV.get(thuocTinh):
+				mapCSV[thuocTinh] = dictCSV.get(thuocTinh).get(lineNum)
+		listMapCSV.append(mapCSV)
+		lineNum = lineNum + 1
 
-   		writer.writerow(listTT)
-   		writer.writerows(listMapCSV)
+	#ghi file
+	print('---- xuat file ---')
+	with open(filename, 'w', newline='') as file:
+		csvWriter = csv.DictWriter(file, fieldnames = listHeaderTT)
+		csvWriter.writeheader()
+		csvWriter.writerows(listMapCSV)
 
 def chiDocCSV(filename):
 	with open(filename, 'r') as file:
@@ -83,10 +86,10 @@ def minMaxThuocTinh(dictCSV, thuocTinh):
 		for lineNum in dictCSV.get(thuocTinh).keys():
 
 			if dictCSV.get(thuocTinh).get(lineNum) < min:
-				min = dictCSV.get(lineNum).get(thuocTinh)
+				min = dictCSV.get(thuocTinh).get(lineNum)
 
 			if dictCSV.get(thuocTinh).get(lineNum) > max:
-				max = dictCSV.get(lineNum).get(thuocTinh)
+				max = dictCSV.get(thuocTinh).get(lineNum)
 
 		minMaxMap['max'] = max
 		minMaxMap['min'] = min
@@ -96,11 +99,13 @@ def minMaxThuocTinh(dictCSV, thuocTinh):
 #tìm trung bình
 def trungBinh(dictCSV, thuocTinh):
 	sum = 0
-	count = 1
+	count = 0
 	for lineNum in dictCSV.get(thuocTinh).keys():
 		sum = sum + dictCSV.get(thuocTinh).get(lineNum)
 		count = count + 1
-	return sum / count
+	if count != 0:
+		return sum / count
+	return 0
 
 
 #công thức chuẩn hóa
@@ -109,13 +114,11 @@ def trungBinh(dictCSV, thuocTinh):
 def normalization(dictCSV, thuocTinh):
 	if thuocTinh in dictCSV:
 		minMaxMap = minMaxThuocTinh(dictCSV, thuocTinh)
-
 		mau = minMaxMap.get('max') - minMaxMap.get('min')
-		
-
-		for lineNum in dictCSV.get(thuocTinh).keys():
-			normalize = (dictCSV.get(thuocTinh).get(lineNum) - min) / mau
-			dictCSV.get(thuocTinh).update({lineNum : normalize})
+		if mau != 0:
+			for lineNum in dictCSV.get(thuocTinh).keys():
+				normalize = roundNumber( (dictCSV.get(thuocTinh).get(lineNum) - minMaxMap.get('min')) / mau )
+				dictCSV.get(thuocTinh).update({lineNum : normalize})
 
 
 #công thức tính z-score
@@ -127,20 +130,22 @@ def z_score(dictCSV, thuocTinh):
 	tu = 0
 	phuongSai = 0
 	doLechChuan = 0
+	n = 0
 
 	#tinh tu so cua phuong sai
 	for lineNum in dictCSV.get(thuocTinh).keys():
 		number = dictCSV.get(thuocTinh).get(lineNum)
 		tu = tu + pow(number, 2)
+		n = n + 1
 
 	tb = trungBinh(dictCSV, thuocTinh)
 
-	phuongSai = tu / n - pow(trungBinh, 2)
+	phuongSai = tu / n - pow(tb, 2)
 	doLechChuan = math.sqrt(phuongSai)
 
 	#chuan hoa z-score
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		normalize = (dictCSV.get(thuocTinh).get(lineNum) - tb) / doLechChuan
+		normalize = roundNumber( (dictCSV.get(thuocTinh).get(lineNum) - tb) / doLechChuan )
 		dictCSV.get(thuocTinh).update({lineNum : normalize})
 
 #Xóa mẫu dữ liệu
@@ -255,12 +260,54 @@ def checkValueIsNumber(dictThuocTinh):
 
 	return isNumber
 
-#nhận tham số dòng lệnh?
+#convert string to number
+def convertStringToNumber(valueString):
+	val = None
+	try:
+		if "." in valueString:
+			val = float(valueString)
+		else:
+			val = int(valueString)
+	except ValueError:
+		return valueString
+	return val
+
+
+def roundNumber(value):
+	return round(value, 3)
+
 def hamMain():
-	pass
+	parser = argparse.ArgumentParser(description='Tien xu ly du lieu')
+	parser.add_argument('--input', help ="input csv", required=True)
+	parser.add_argument('--output', help ="output csv", required=True)
+	parser.add_argument('--task', help ="task thuc thi", choices=['cauA', 'cauB', 'cauC', 'cauD', 'cauE', 'cauF'], required=True)
+	parser.add_argument('--bin', help ="bin", type=int)
+	parser.add_argument('--prop', help ="thuoc tinh chi dinh", required=True)
+	args = parser.parse_args()
+
+	#đọc tập tin
+	generalMap = docCSV(args.input)
+	#get dict
+	dictCSV = generalMap.get('sampleCSV')
+	maxLineNum = generalMap.get('maxLineNum')
+	headerListTT = generalMap.get('headerThuocTinhList')
 	
-filename = 'text.csv'
-outputName = 'textResult.csv'
-docCSV(filename)
-ghiCSV(outputName)
-#chiDocCSV(filename)
+	#task list
+	if args.task == 'cauA':
+		normalization(dictCSV, args.prop)
+	if args.task == 'cauB':
+		z_score(dictCSV, args.prop)
+	if args.task == 'cauC':
+		chiaGioDoRong(dictCSV, args.prop, args.bin)
+	if args.task == 'cauD':
+		chiaGioDoSau(dictCSV, args.prop, args.bin)
+	if args.task == 'cauE':
+		xoaMauDuLieu(dictCSV, args.prop)
+	if args.task == 'cauF':
+		dienGiaTriThieu(dictCSV, args.prop)
+
+	ghiCSV(args.output, dictCSV, headerListTT, maxLineNum)
+
+
+
+hamMain()
