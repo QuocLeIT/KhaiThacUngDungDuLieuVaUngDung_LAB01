@@ -105,8 +105,9 @@ def trungBinh(dictCSV, thuocTinh):
 	sum = 0
 	count = 0
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		sum = sum + dictCSV.get(thuocTinh).get(lineNum)
-		count = count + 1
+		if dictCSV.get(thuocTinh).get(lineNum) != '?':
+			sum = sum + dictCSV.get(thuocTinh).get(lineNum)
+			count = count + 1
 	if count != 0:
 		return sum / count
 	return 0
@@ -163,28 +164,6 @@ def xoaMauDuLieu(dictCSV, thuocTinh):
 		for lineNum in listCSV:
 			dictCSV.get(tt).pop(lineNum)
 
-
-#Tìm giá trị rời rạc có tần suất cao nhất
-def tanSuatCaoNhat(dictCSV, thuocTinh):
-	maxTanSuat = 0
-	roiRacMap = dict()
-
-	#thống kê các giá trị rời rạc
-	for lineNum in dictCSV.get(thuocTinh).keys():
-		valRoiRac = dictCSV.get(thuocTinh).get(lineNum)
-		if valRoiRac not in roiRacMap:
-			roiRacMap[valRoiRac] = 1
-			continue
-		roiRacMap[valRoiRac] = roiRacMap.get(valRoiRac) + 1
-
-	#tìm tần suất cao nhất
-	roiRac = ''
-	for valRoiRac in roiRacMap.keys():
-		if maxTanSuat > roiRacMap.get(valRoiRac):
-			maxTanSuat = roiRacMap.get(valRoiRac)
-			roiRac = valRoiRac
-
-	return roiRac
 
 def chiaGioDoRong(dictCSV, thuocTinh, nEqualWidth):
 	minMaxMap = minMaxThuocTinh(dictCSV, thuocTinh)
@@ -255,18 +234,41 @@ def chiaGioDoSau(dictCSV, thuocTinh, nEqualDepth):
 				bien = "[" + str(bienTrai) + "-" + str(bienPhai) + "]"
 				dictCSV.get(thuocTinh).update({lineNum : bien})
 
+#Tìm giá trị rời rạc có tần suất cao nhất
+def tanSuatCaoNhat(dictCSV, thuocTinh):
+	maxTanSuat = 0
+	roiRacMap = dict()
+
+	#thống kê các giá trị rời rạc
+	for lineNum in dictCSV.get(thuocTinh).keys():
+		valRoiRac = dictCSV.get(thuocTinh).get(lineNum)
+		if valRoiRac != '?':
+			if valRoiRac not in roiRacMap:
+				roiRacMap[valRoiRac] = 1
+				continue
+			roiRacMap[valRoiRac] = roiRacMap.get(valRoiRac) + 1
+
+	#tìm tần suất cao nhất
+	roiRac = ""
+	for valRoiRac in roiRacMap.keys():
+		if maxTanSuat < roiRacMap.get(valRoiRac):
+			maxTanSuat = roiRacMap.get(valRoiRac)
+			roiRac = valRoiRac
+
+	return roiRac
+
 #Điền giá trị thiếu
 def dienGiaTriThieu(dictCSV, thuocTinh):
-	valueReplace = 0
+	valueReplace = None
 	
 	#là thuoc tinh roi rac
-	if checkValueIsNumber(dict.get(thuocTinh)):
-		valueReplace = tanSuatCaoNhat(dict, thuocTinh)
+	if checkValueIsNumber(dictCSV.get(thuocTinh)):
+		valueReplace = roundNumber( trungBinh(dictCSV, thuocTinh) )
 	else:
-		valueReplace = trungBinh(dictCSV, thuocTinh)
+		valueReplace = tanSuatCaoNhat(dictCSV, thuocTinh)
 
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		if valueReplace == '?':
+		if dictCSV.get(thuocTinh).get(lineNum) == '?':
 			dictCSV.get(thuocTinh).update({lineNum : valueReplace})
 
 #check giá trị là số hay chữ
@@ -274,12 +276,13 @@ def checkValueIsNumber(dictThuocTinh):
 	isNumber = True
 	try:
 		for lineNum in dictThuocTinh.keys():
-			if "." in dictThuocTinh.get(lineNum):
-				val = float(dictThuocTinh.get(lineNum))
-				break
-			else:
-				val = int(dictThuocTinh.get(lineNum))
-				break
+			if dictThuocTinh.get(lineNum) != '?':
+				if "." in str(dictThuocTinh.get(lineNum)):
+					val = float(str(dictThuocTinh.get(lineNum)))
+					break
+				else:
+					val = int(str(dictThuocTinh.get(lineNum)))
+					break
 	except ValueError:
 		isNumber = False
 
