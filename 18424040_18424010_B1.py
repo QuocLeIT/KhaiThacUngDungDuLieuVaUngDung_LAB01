@@ -4,7 +4,7 @@ import argparse
 
 #đọc tập tin và trả list
 def docCSV(filename):
-	with open(filename, 'r') as file:
+	with open(filename, mode="r", encoding='latin-1') as file:
 		csvReader = csv.reader(file)
 
 		rowsCSV = list()
@@ -60,7 +60,7 @@ def ghiCSV(filename, dictCSV, listHeaderTT, maxLineNum):
 
 	#ghi file
 	print('---- xuat file ---')
-	with open(filename, 'w', newline='') as file:
+	with open(filename, 'w', newline='', encoding='latin-1') as file:
 		csvWriter = csv.DictWriter(file, fieldnames = listHeaderTT)
 		csvWriter.writeheader()
 		csvWriter.writerows(listMapCSV)
@@ -105,7 +105,7 @@ def trungBinh(dictCSV, thuocTinh):
 	sum = 0
 	count = 0
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		if dictCSV.get(thuocTinh).get(lineNum) != '?':
+		if dictCSV.get(thuocTinh).get(lineNum) != '?' or dictCSV.get(thuocTinh).get(lineNum) != "":
 			sum = sum + dictCSV.get(thuocTinh).get(lineNum)
 			count = count + 1
 	if count != 0:
@@ -242,7 +242,7 @@ def tanSuatCaoNhat(dictCSV, thuocTinh):
 	#thống kê các giá trị rời rạc
 	for lineNum in dictCSV.get(thuocTinh).keys():
 		valRoiRac = dictCSV.get(thuocTinh).get(lineNum)
-		if valRoiRac != '?':
+		if valRoiRac != '?' or valRoiRac != "":
 			if valRoiRac not in roiRacMap:
 				roiRacMap[valRoiRac] = 1
 				continue
@@ -268,7 +268,7 @@ def dienGiaTriThieu(dictCSV, thuocTinh):
 		valueReplace = tanSuatCaoNhat(dictCSV, thuocTinh)
 
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		if dictCSV.get(thuocTinh).get(lineNum) == '?':
+		if dictCSV.get(thuocTinh).get(lineNum) == '?' or dictCSV.get(thuocTinh).get(lineNum) == "":
 			dictCSV.get(thuocTinh).update({lineNum : valueReplace})
 
 #check giá trị là số hay chữ
@@ -276,7 +276,7 @@ def checkValueIsNumber(dictThuocTinh):
 	isNumber = True
 	try:
 		for lineNum in dictThuocTinh.keys():
-			if dictThuocTinh.get(lineNum) != '?':
+			if dictThuocTinh.get(lineNum) != '?' or dictThuocTinh.get(lineNum) != "":
 				if "." in str(dictThuocTinh.get(lineNum)):
 					val = float(str(dictThuocTinh.get(lineNum)))
 					break
