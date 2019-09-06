@@ -54,7 +54,8 @@ def ghiCSV(filename, dictCSV, listHeaderTT, maxLineNum):
 		for thuocTinh in listHeaderTT:
 			if lineNum in dictCSV.get(thuocTinh):
 				mapCSV[thuocTinh] = dictCSV.get(thuocTinh).get(lineNum)
-		listMapCSV.append(mapCSV)
+		if bool(mapCSV):
+			listMapCSV.append(mapCSV)
 		lineNum = lineNum + 1
 
 	#ghi file
@@ -156,13 +157,11 @@ def xoaMauDuLieu(dictCSV, thuocTinh):
 	listCSV = list()
 	for lineNum in dictCSV.get(thuocTinh).keys():
 		if dictCSV.get(thuocTinh).get(lineNum) == '?':
-			dictCSV.get(thuocTinh).pop(lineNum)
 			listCSV.append(lineNum)
 
 	for tt in dictCSV.keys():
-		if tt != thuocTinh:
-			for lineNum in listCSV:
-				dictCSV.get(tt).pop(lineNum)
+		for lineNum in listCSV:
+			dictCSV.get(tt).pop(lineNum)
 
 
 #Tìm giá trị rời rạc có tần suất cao nhất
@@ -216,7 +215,8 @@ def chiaGioDoRong(dictCSV, thuocTinh, nEqualWidth):
 				bien = "[" + str(bienTrai) + "-" + str(bienPhai) + "]"
 				dictCSV.get(thuocTinh).update({lineNum : bien})
 
-#TODO: chưa làm xong, cần lại tạo giỏ
+
+
 def chiaGioDoSau(dictCSV, thuocTinh, nEqualDepth):
 	minMaxMap = minMaxThuocTinh(dictCSV, thuocTinh)
 	doSauGio = minMaxMap.get('numOfEle') / nEqualDepth
@@ -326,10 +326,10 @@ def hamMain():
 	 	chiaGioDoRong(dictCSV, args.prop, args.bin)
 	if args.task == 'cauD':
 		chiaGioDoSau(dictCSV, args.prop, args.bin)
-	# if args.task == 'cauE':
-	# 	xoaMauDuLieu(dictCSV, args.prop)
-	# if args.task == 'cauF':
-	# 	dienGiaTriThieu(dictCSV, args.prop)
+	if args.task == 'cauE':
+		xoaMauDuLieu(dictCSV, args.prop)
+	if args.task == 'cauF':
+		dienGiaTriThieu(dictCSV, args.prop)
 
 	ghiCSV(args.output, dictCSV, headerListTT, maxLineNum)
 
