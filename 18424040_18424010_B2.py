@@ -1,6 +1,9 @@
 import sys, getopt
 import csv
 import argparse
+import locale
+ 
+#locale.getpreferredencoding(False)
 
 #command line
 #script, first, second = argv
@@ -8,6 +11,9 @@ import argparse
 
 txtFile = str(sys.argv[1])#"countries.txt"
 csvfile = str(sys.argv[2])#"18424040_18424010_B2.csv"
+
+#txtFile = "countries.txt"
+#csvfile = "18424040_18424010_B2.csv"
 
 rowindex = 8
 rowPlus = 7
@@ -73,7 +79,7 @@ class Countries:
 
 
 #main-----------------------------------------
-with open(txtFile, "r") as file:
+with open(txtFile, "r", encoding='latin-1') as file:
     lines = [line.strip() for line in file]
 #
 n = len(lines)
@@ -203,7 +209,7 @@ print ("Finish")
 #Xuat csv List
 print ("-Writing csv")
 i = 0
-with open(csvfile, 'w+', newline='') as csvfile:
+with open(csvfile, 'w+', newline='', encoding='latin-1') as csvfile:
     fieldnames = [countryN, nameN, longNameN, foundingDateN, populationN, capitalN, largestCityN, areaN]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
