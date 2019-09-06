@@ -1,6 +1,6 @@
 import sys, getopt
 import csv
-#from sys import argv
+import argparse
 
 #command line
 #script, first, second = argv
@@ -185,6 +185,7 @@ while i < indexL:
 print ("Finish") 
 b2_3 = "Chuyen km2: Finish"
 
+"""
 print ("-Writing csv")
 i = 0
 with open(csvfile, 'w+', newline='') as csvfile:
@@ -197,8 +198,8 @@ with open(csvfile, 'w+', newline='') as csvfile:
     writer.writerow({"Ket qua": b2_3})
     	
 print ("Finish") 
-
 """
+
 #Xuat csv List
 print ("-Writing csv")
 i = 0
@@ -219,4 +220,3 @@ with open(csvfile, 'w+', newline='') as csvfile:
     				largestCityN: c1.largestCity,
     				areaN: c1.area})
 print ("Finish")  
-"""
