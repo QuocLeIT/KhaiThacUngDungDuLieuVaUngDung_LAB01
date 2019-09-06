@@ -79,6 +79,7 @@ def chiDocCSV(filename):
 #tìm min max thuoc tinh
 def minMaxThuocTinh(dictCSV, thuocTinh):
 	minMaxMap = dict()
+	numOfEle = 0
 	if thuocTinh in dictCSV:
 		min = dictCSV.get(thuocTinh).get(0) if 0 in dictCSV.get(thuocTinh) else 0 # check null
 		max = dictCSV.get(thuocTinh).get(0) if 0 in dictCSV.get(thuocTinh) else 0 # check null
@@ -90,7 +91,9 @@ def minMaxThuocTinh(dictCSV, thuocTinh):
 
 			if dictCSV.get(thuocTinh).get(lineNum) > max:
 				max = dictCSV.get(thuocTinh).get(lineNum)
+			numOfEle = numOfEle + 1
 
+		minMaxMap['numOfEle'] = numOfEle
 		minMaxMap['max'] = max
 		minMaxMap['min'] = min
 	return minMaxMap
@@ -187,48 +190,70 @@ def tanSuatCaoNhat(dictCSV, thuocTinh):
 def chiaGioDoRong(dictCSV, thuocTinh, nEqualWidth):
 	minMaxMap = minMaxThuocTinh(dictCSV, thuocTinh)
 	doRongGio = (minMaxMap.get('max') - minMaxMap.get('min')) / nEqualWidth
+	if round(doRongGio) < doRongGio:
+		doRongGio = round(doRongGio) + 1
+	else:
+		doRongGio = round(doRongGio)
+
 	bienTrai = minMaxMap.get('min')
 	mapGio = dict()
-
+	
 	#Tạo độ rộng giỏ
 	while bienTrai < minMaxMap.get('max'):
-		if bienTrai not in mapGio:
-			mapGio[bienTrai] = list()
-		bienTrai += doRongGio
+		bienPhai = bienTrai + doRongGio
+		mapGio[bienTrai] = bienPhai
+		bienTrai = bienPhai
 
 	#Thêm giá trị vào giỏ
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		bienPhai = mapGio.get(bienTrai) + doRongGio
 		value = dictCSV.get(thuocTinh).get(lineNum)
-		if bienTrai <= value and value < bienPhai:
-			mapGio.get(bienTrai).append(value)
-		elif value == minMaxMap.get('max'):
-			mapGio.get(bienTrai).append(value)
+		for bienTrai in mapGio.keys():
+			bienPhai = mapGio.get(bienTrai)
+			if bienTrai <= value and value < bienPhai:
+				bien = "[" + str(bienTrai) + "-" + str(bienPhai) + ")"
+				dictCSV.get(thuocTinh).update({lineNum : bien})
+			elif value == bienPhai:
+				bien = "[" + str(bienTrai) + "-" + str(bienPhai) + "]"
+				dictCSV.get(thuocTinh).update({lineNum : bien})
 
-	return mapGio
-
-#TODO: chưa xong task tìm số lượng các phần tử
+#TODO: chưa làm xong, cần lại tạo giỏ
 def chiaGioDoSau(dictCSV, thuocTinh, nEqualDepth):
 	minMaxMap = minMaxThuocTinh(dictCSV, thuocTinh)
-	numOfEle = dsad
-	doSauGio = numOfEle / nEqualDepth
+	doSauGio = minMaxMap.get('numOfEle') / nEqualDepth
+
+	if round(doSauGio) < doSauGio:
+		doSauGio = round(doSauGio) + 1
+	else:
+		doSauGio = round(doSauGio)
+
 	bienTrai = minMaxMap.get('min')
+	bienPhai = minMaxMap.get('max')
 	mapGio = dict()
 
-	#Tạo độ sâu giỏ
-	while bienTrai < minMaxMap.get('max'):
-		if bienTrai not in mapGio:
-			mapGio[bienTrai] = list()
-		bienTrai += doSauGio
+	count = 0
+	gio = bienTrai
+	mapGio[gio] = list()
 
-	#Thêm giá trị vào giỏ
+	while bienTrai <= bienPhai:
+
+		if count >= doSauGio:
+			count = 0
+			gio = bienTrai
+			mapGio[gio] = list()
+
+		for lineNum in dictCSV.get(thuocTinh).keys():
+			if count < doSauGio and bienTrai == dictCSV.get(thuocTinh).get(lineNum):
+				mapGio.get(gio).append(bienTrai)
+				count += 1
+
+		bienTrai += 1
+
 	for lineNum in dictCSV.get(thuocTinh).keys():
-		bienPhai = mapGio.get(bienTrai) + doSauGio
-		value = dictCSV.get(thuocTinh).get(lineNum)
-		if bienTrai <= value and value <= bienPhai:
-			mapGio.get(bienTrai).append(value)
-
-	return mapGio
+		for bienTrai in mapGio.keys():
+			if dictCSV.get(thuocTinh).get(lineNum) in mapGio.get(bienTrai):
+				bienPhai = max(mapGio.get(bienTrai))
+				bien = "[" + str(bienTrai) + "-" + str(bienPhai) + "]"
+				dictCSV.get(thuocTinh).update({lineNum : bien})
 
 #Điền giá trị thiếu
 def dienGiaTriThieu(dictCSV, thuocTinh):
@@ -273,8 +298,8 @@ def convertStringToNumber(valueString):
 	return val
 
 
-def roundNumber(value):
-	return round(value, 3)
+def roundNumber(value, digit = 3):
+	return round(value, digit)
 
 def hamMain():
 	parser = argparse.ArgumentParser(description='Tien xu ly du lieu')
@@ -298,13 +323,13 @@ def hamMain():
 	if args.task == 'cauB':
 		z_score(dictCSV, args.prop)
 	if args.task == 'cauC':
-		chiaGioDoRong(dictCSV, args.prop, args.bin)
+	 	chiaGioDoRong(dictCSV, args.prop, args.bin)
 	if args.task == 'cauD':
 		chiaGioDoSau(dictCSV, args.prop, args.bin)
-	if args.task == 'cauE':
-		xoaMauDuLieu(dictCSV, args.prop)
-	if args.task == 'cauF':
-		dienGiaTriThieu(dictCSV, args.prop)
+	# if args.task == 'cauE':
+	# 	xoaMauDuLieu(dictCSV, args.prop)
+	# if args.task == 'cauF':
+	# 	dienGiaTriThieu(dictCSV, args.prop)
 
 	ghiCSV(args.output, dictCSV, headerListTT, maxLineNum)
 
